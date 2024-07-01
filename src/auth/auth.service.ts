@@ -23,9 +23,7 @@ export class AuthService {
 
   async signUp({ email, firstname, lastname, password, username }: SignUpDto) {
     try {
-      const hashedPassword = await bcrypt.hash(password, 10).catch((err) => {
-        throw new InternalServerErrorException(null, { cause: err });
-      });
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       await this.userRepository
         .createQueryBuilder()
