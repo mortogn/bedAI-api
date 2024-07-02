@@ -35,7 +35,6 @@ export class StoriesController {
     @Body() createCharacterDto: CreateCharacterDto,
     @User('id') id: string,
   ) {
-    console.log('Create character is going to start');
     return this.storiesService.createCharacter(id, createCharacterDto);
   }
 }

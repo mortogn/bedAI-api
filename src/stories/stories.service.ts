@@ -82,8 +82,6 @@ export class StoriesService {
     creatorId: string,
     createCharacterDto: CreateCharacterDto,
   ) {
-    console.log({ creatorId, createCharacterDto });
-
     try {
       //? Checking if the logged in user the one who created the provided prompt
       const prompt = await this.promptRepository
@@ -98,8 +96,6 @@ export class StoriesService {
       if (!prompt) {
         throw new ForbiddenException();
       }
-
-      console.log("Successfully checked, now it's time for character created");
 
       const character = await this.characterRepository
         .createQueryBuilder()
