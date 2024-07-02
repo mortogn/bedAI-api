@@ -18,7 +18,9 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/auth/public": ["./src/auth/decorators/public.decorator"],
+      "@/auth/user": ["./src/auth/decorators/user.decorator"]
     }
   }
 }
