@@ -1,5 +1,18 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Character } from './character.entity';
+import { User } from '@/users/entities/user.entity';
+
+export enum PromptStatus {
+  READY = 'ready',
+  DRAFT = 'draft',
+}
 
 @Entity()
 export class Prompt {
@@ -15,6 +28,16 @@ export class Prompt {
   @Column()
   ending: string;
 
+  @Column({ type: 'enum', enum: PromptStatus })
+  status: PromptStatus;
+
   @OneToMany(() => Character, (character) => character.prompt)
   characters: Character[];
+
+  @Column()
+  creatorId: string;
+
+  @ManyToOne(() => User, (user) => user.prompts)
+  @JoinColumn({ name: 'creatorId' })
+  creator: User;
 }

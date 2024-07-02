@@ -85,12 +85,11 @@ export class AuthService {
         refreshToken: await this.generateRefreshToken(user.raw[0].id),
       };
     } catch (err) {
-      this.logger.error(err);
-
       if (err instanceof HttpException) {
         throw err;
       }
 
+      this.logger.error(err);
       throw new InternalServerErrorException();
     }
   }
@@ -119,13 +118,11 @@ export class AuthService {
         refreshToken: await this.generateRefreshToken(user.id),
       };
     } catch (err) {
-      if (!(err instanceof BadRequestException)) {
-        this.logger.error(err);
-      }
-
       if (err instanceof HttpException) {
         throw err;
       }
+
+      this.logger.error(err);
 
       throw new InternalServerErrorException();
     }

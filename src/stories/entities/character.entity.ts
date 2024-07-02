@@ -9,9 +9,9 @@ import { Story } from './story.entity';
 import { Prompt } from './prompt.entity';
 
 export enum CharacterPriority {
-  MAIN,
-  SIDE,
-  BACKGROUND,
+  MAIN = 'main',
+  SIDE = 'side',
+  BACKGROUND = 'background',
 }
 
 @Entity()

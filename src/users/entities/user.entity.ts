@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Prompt } from '@/stories/entities/prompt.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -19,4 +20,7 @@ export class User {
 
   @Column({ unique: true })
   username: string;
+
+  @OneToMany(() => Prompt, (prompt) => prompt.creator)
+  prompts: Prompt[];
 }
