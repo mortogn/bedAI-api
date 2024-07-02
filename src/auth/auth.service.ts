@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/users/entities/user.entity';
@@ -50,6 +51,12 @@ export class AuthService {
   async veriftyAccessJWT(token: string) {
     return await this.jwtService.verifyAsync(token, {
       secret: this.configService.get<string>('jwt.secret'),
+    });
+  }
+
+  async veriftyRefreshJWT(refreshToken: string) {
+    return await this.jwtService.verifyAsync(refreshToken, {
+      secret: this.configService.get<string>('jwt.refreshSecret'),
     });
   }
 
@@ -121,6 +128,23 @@ export class AuthService {
       }
 
       throw new InternalServerErrorException();
+    }
+  }
+
+  /*
+  ? Takes refresh token as argument, if the token is valid, regenerate access and refresh token and return them.
+  ? Web client will be able to pass a refresh token and get fresh two tokens as response.
+  */
+  async refreshAuthTokens(refreshToken: string) {
+    try {
+      const payload = await this.veriftyRefreshJWT(refreshToken);
+
+      return {
+        accessToken: await this.generateAccessToken(payload.sub),
+        refreshToken: await this.generateRefreshToken(payload.sub),
+      };
+    } catch (err) {
+      throw new UnauthorizedException();
     }
   }
 }

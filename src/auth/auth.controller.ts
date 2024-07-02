@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signup.dto';
 import { SignInDto } from './dto/signin.dto';
 import { Public } from './decorators/public.decorator';
+import { RefreshAuthTokensDto } from './dto/refresh-auth-tokens.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,5 +19,13 @@ export class AuthController {
   @Post('/signin')
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
+  }
+
+  @Public()
+  @Post('token/refresh')
+  refreshAuthTokens(@Body() refreshAuthTokensDto: RefreshAuthTokensDto) {
+    return this.authService.refreshAuthTokens(
+      refreshAuthTokensDto.refreshToken,
+    );
   }
 }
