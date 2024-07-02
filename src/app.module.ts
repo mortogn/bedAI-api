@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validate } from './env.validation';
+import { StoriesModule } from './stories/stories.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -34,6 +35,7 @@ import configuration from './config/configuration';
     }),
     AuthModule,
     UsersModule,
+    StoriesModule,
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
