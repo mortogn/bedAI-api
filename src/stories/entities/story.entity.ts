@@ -7,10 +7,16 @@ import {
 } from 'typeorm';
 import { Prompt } from './prompt.entity';
 
-export enum StoryStatus {
+export enum StoryState {
   PROCESSING = 'processing',
   DONE = 'done',
   ERROR = 'error',
+}
+
+export enum StoryVisibility {
+  PUBLIC = 'public',
+  UNLISTED = 'unlisted',
+  PRIVATE = 'private',
 }
 
 @Entity()
@@ -27,8 +33,11 @@ export class Story {
   @Column()
   content: string;
 
-  @Column({ type: 'enum', enum: StoryStatus })
-  status: StoryStatus;
+  @Column({ type: 'enum', enum: StoryState })
+  state: StoryState;
+
+  @Column({ type: 'enum', enum: StoryVisibility })
+  visibility: StoryVisibility;
 
   @Column({ select: false })
   promptId: string;

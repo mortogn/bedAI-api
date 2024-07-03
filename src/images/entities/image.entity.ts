@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export enum ImageStatus {
+export enum ImageState {
   DONE = 'done',
   PROCESSING = 'processing',
   ERROR = 'error',
@@ -31,8 +31,8 @@ export class Image {
   @Column()
   prompt: string;
 
-  @Column({ type: 'enum', enum: ImageStatus, default: ImageStatus.PROCESSING })
-  status: ImageStatus;
+  @Column({ type: 'enum', enum: ImageState, default: ImageState.PROCESSING })
+  status: ImageState;
 
   @Column()
   creatorId: string;
