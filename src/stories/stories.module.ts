@@ -9,5 +9,6 @@ import { Character } from './entities/character.entity';
   imports: [TypeOrmModule.forFeature([Prompt, Character])],
   controllers: [StoriesController],
   providers: [StoriesService],
+  exports: [TypeOrmModule],
 })
 export class StoriesModule {}

@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { validate } from './env.validation';
 import { StoriesModule } from './stories/stories.module';
+import { ImagesModule } from './images/images.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -36,6 +37,7 @@ import configuration from './config/configuration';
     AuthModule,
     UsersModule,
     StoriesModule,
+    ImagesModule,
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

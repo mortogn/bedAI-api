@@ -1,3 +1,4 @@
+import { Image } from '@/images/entities/image.entity';
 import { Prompt } from '@/stories/entities/prompt.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -23,4 +24,7 @@ export class User {
 
   @OneToMany(() => Prompt, (prompt) => prompt.creator)
   prompts: Prompt[];
+
+  @OneToMany(() => Image, (image) => image.creator)
+  images: Image[];
 }
