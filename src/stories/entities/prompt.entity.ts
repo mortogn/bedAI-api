@@ -4,10 +4,12 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Character } from './character.entity';
 import { User } from '@/users/entities/user.entity';
+import { Story } from './story.entity';
 
 export enum PromptStatus {
   READY = 'ready',
@@ -18,6 +20,9 @@ export enum PromptStatus {
 export class Prompt {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ type: 'timestamptz', default: new Date() })
+  createdAt: Date;
 
   @Column()
   plot: string;
@@ -40,4 +45,7 @@ export class Prompt {
   @ManyToOne(() => User, (user) => user.prompts)
   @JoinColumn({ name: 'creatorId' })
   creator: User;
+
+  @OneToOne(() => Story, (story) => story.prompt)
+  story: Story;
 }
