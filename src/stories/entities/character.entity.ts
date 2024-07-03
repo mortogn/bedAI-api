@@ -31,7 +31,7 @@ export class Character {
   })
   priority: CharacterPriority;
 
-  @Column()
+  @Column({ select: false })
   promptId: string;
 
   @ManyToOne(() => Prompt, (prompt) => prompt.characters)

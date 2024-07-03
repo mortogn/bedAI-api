@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { StoriesService } from './stories.service';
 import { CreatePromptDto } from './dto/create-prompt.dto';
@@ -27,10 +29,18 @@ export class StoriesController {
       createPromptDto,
     );
   }
-  //   @Get("prompts")
-  //   getPrompts() {
-
-  //   }
+  @Get('prompts')
+  getPrompts(
+    @User('id') id: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.storiesService.getPrompts(
+      id,
+      take ? Number.parseInt(take) : 20,
+      skip ? Number.parseInt(skip) : 0,
+    );
+  }
 
   @Get('prompts/:id')
   getPrompt(

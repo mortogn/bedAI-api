@@ -34,7 +34,7 @@ export class Prompt {
   @OneToMany(() => Character, (character) => character.prompt)
   characters: Character[];
 
-  @Column()
+  @Column({ select: false })
   creatorId: string;
 
   @ManyToOne(() => User, (user) => user.prompts)

@@ -78,6 +78,28 @@ export class StoriesService {
     }
   }
 
+  async getPrompts(creatorId: string, take = 20, skip = 0) {
+    try {
+      const prompts = await this.promptRepository
+        .createQueryBuilder('prompt')
+        .select(['prompt.id', 'prompt.plot', 'character.id', 'character.name'])
+        .leftJoinAndSelect('prompt.characters', 'character')
+        .where('prompt.creatorId = :creatorId', { creatorId })
+        .skip(skip)
+        .take(take)
+        .getMany();
+
+      return prompts;
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
+      this.logger.error(err);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async createCharacter(
     creatorId: string,
     createCharacterDto: CreateCharacterDto,

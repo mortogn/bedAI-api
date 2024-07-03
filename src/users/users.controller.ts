@@ -6,7 +6,7 @@ import { User } from '@/auth/user';
 export class UsersController {
   constructor(private usersServices: UsersService) {}
 
-  @Get('/@me')
+  @Get('@me')
   me(@User('id') id: string) {
     return this.usersServices.byId(id);
   }
