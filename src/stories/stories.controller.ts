@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { StoriesService } from './stories.service';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { User } from '@/auth/user';
@@ -26,7 +33,10 @@ export class StoriesController {
   //   }
 
   @Get('prompts/:id')
-  getPrompt(@Param('id') id: string, @User('id') userId: string) {
+  getPrompt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @User('id') userId: string,
+  ) {
     return this.storiesService.getPrompt(userId, id);
   }
 
