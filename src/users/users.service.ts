@@ -19,15 +19,20 @@ export class UsersService {
   ) {}
 
   async byId(id: string) {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.id = :id', { id })
-      .getOne();
+    try {
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id = :id', { id })
+        .getOne();
 
-    if (!user) {
-      throw new NotFoundException();
+      if (!user) {
+        throw new NotFoundException();
+      }
+
+      return user;
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
     }
-
-    return user;
   }
 }
