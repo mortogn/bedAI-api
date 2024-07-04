@@ -61,71 +61,52 @@ export class AuthService {
   }
 
   async signUp({ email, firstname, lastname, password, username }: SignUpDto) {
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      const user = await this.userRepository
-        .createQueryBuilder()
-        .insert()
-        .values([
-          {
-            email,
-            firstname,
-            lastname,
-            username,
-            password: hashedPassword,
-          },
-        ])
-        .returning('id')
-        .execute();
+    const user = await this.userRepository
+      .createQueryBuilder()
+      .insert()
+      .values([
+        {
+          email,
+          firstname,
+          lastname,
+          username,
+          password: hashedPassword,
+        },
+      ])
+      .returning('id')
+      .execute();
 
-      //TODO: Return access and refresh token
-      return {
-        accessToken: await this.generateAccessToken(user.raw[0].id),
-        refreshToken: await this.generateRefreshToken(user.raw[0].id),
-      };
-    } catch (err) {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
-      this.logger.error(err);
-      throw new InternalServerErrorException();
-    }
+    //TODO: Return access and refresh token
+    return {
+      accessToken: await this.generateAccessToken(user.raw[0].id),
+      refreshToken: await this.generateRefreshToken(user.raw[0].id),
+    };
   }
 
   async signIn({ email, password }: SignInDto) {
-    try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .select(['user.email', 'user.password', 'user.id'])
-        .where('user.email = :email', { email })
-        .getOne();
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.email', 'user.password', 'user.id'])
+      .where('user.email = :email', { email })
+      .getOne();
 
-      if (!user) {
-        throw new BadRequestException('Invalid credentials');
-      }
-
-      const isValidPassword = await bcrypt.compare(password, user.password);
-
-      if (!isValidPassword) {
-        throw new BadRequestException('Invalid credentials');
-      }
-
-      //TODO: Return access and refresh token
-      return {
-        accessToken: await this.generateAccessToken(user.id),
-        refreshToken: await this.generateRefreshToken(user.id),
-      };
-    } catch (err) {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
-      this.logger.error(err);
-
-      throw new InternalServerErrorException();
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
     }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    //TODO: Return access and refresh token
+    return {
+      accessToken: await this.generateAccessToken(user.id),
+      refreshToken: await this.generateRefreshToken(user.id),
+    };
   }
 
   /*

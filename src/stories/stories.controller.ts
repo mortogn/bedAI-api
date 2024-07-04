@@ -3,15 +3,14 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { StoriesService } from './stories.service';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { User } from '@/auth/user';
-import { PromptStatus } from './entities/prompt.entity';
 import { CreateCharacterDto } from './dto/create-character.dto';
 
 @Controller('stories')
@@ -23,12 +22,12 @@ export class StoriesController {
     @Body() createPromptDto: CreatePromptDto,
     @User('id') id: string,
   ) {
-    return this.storiesService.createPrompt(
-      id,
-      PromptStatus.DRAFT,
-      createPromptDto,
-    );
+    return this.storiesService.createPrompt(id, createPromptDto);
   }
+
+  @Patch('prompts/:id')
+  updatePrompt(@Param('id', ParseUUIDPipe) id: string) {}
+
   @Get('prompts')
   getPrompts(
     @User('id') id: string,

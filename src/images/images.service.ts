@@ -63,53 +63,34 @@ export class ImagesService {
       throw new ForbiddenException();
     }
 
-    try {
-      const image = await this.imageRepository
-        .createQueryBuilder()
-        .insert()
-        .values([
-          {
-            creatorId,
-            entity: generateDto.entity,
-            entityId: generateDto.entityId,
-            prompt: generateDto.prompt,
-          },
-        ])
-        .returning(['id'])
-        .execute();
+    const image = await this.imageRepository
+      .createQueryBuilder()
+      .insert()
+      .values([
+        {
+          creatorId,
+          entity: generateDto.entity,
+          entityId: generateDto.entityId,
+          prompt: generateDto.prompt,
+        },
+      ])
+      .returning(['id'])
+      .execute();
 
-      return { id: image.raw[0].id };
-    } catch (err) {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
-      this.logger.error(err);
-
-      throw new InternalServerErrorException();
-    }
+    return { id: image.raw[0].id };
   }
 
   async byId(id: string) {
-    try {
-      const image = await this.imageRepository
-        .createQueryBuilder('image')
-        .select()
-        .where('image.id = :id', { id })
-        .getOne();
+    const image = await this.imageRepository
+      .createQueryBuilder('image')
+      .select()
+      .where('image.id = :id', { id })
+      .getOne();
 
-      if (!image) {
-        throw new NotFoundException();
-      }
-
-      return image;
-    } catch (err) {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
-      this.logger.error(err);
-      throw new InternalServerErrorException();
+    if (!image) {
+      throw new NotFoundException();
     }
+
+    return image;
   }
 }

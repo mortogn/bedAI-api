@@ -11,6 +11,9 @@ import { validate } from './env.validation';
 import { StoriesModule } from './stories/stories.module';
 import { ImagesModule } from './images/images.module';
 import configuration from './config/configuration';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_FILTER } from '@nestjs/core';
+import { ExceptionFilter } from './core/filters/exception.filter';
 
 @Module({
   imports: [
@@ -34,12 +37,21 @@ import configuration from './config/configuration';
       }),
       inject: [ConfigService],
     }),
+
+    EventEmitterModule.forRoot(),
     AuthModule,
     UsersModule,
     StoriesModule,
     ImagesModule,
   ],
   controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  providers: [
+    AppService,
+    UsersService,
+    {
+      provide: APP_FILTER,
+      useClass: ExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

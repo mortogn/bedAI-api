@@ -19,27 +19,15 @@ export class UsersService {
   ) {}
 
   async byId(id: string) {
-    try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .where('user.id = :id', { id })
-        .getOne();
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .getOne();
 
-      if (!user) {
-        throw new NotFoundException();
-      }
-
-      return user;
-    } catch (err) {
-      // Don't want to log not found exception since those are client errors
-      if (!(err instanceof NotFoundException)) {
-        this.logger.error(err);
-      }
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
-      throw new InternalServerErrorException();
+    if (!user) {
+      throw new NotFoundException();
     }
+
+    return user;
   }
 }

@@ -33,16 +33,20 @@ export class Story {
   @Column()
   content: string;
 
-  @Column({ type: 'enum', enum: StoryState })
+  @Column({ type: 'enum', enum: StoryState, default: StoryState.PROCESSING })
   state: StoryState;
 
-  @Column({ type: 'enum', enum: StoryVisibility })
+  @Column({
+    type: 'enum',
+    enum: StoryVisibility,
+    default: StoryVisibility.PRIVATE,
+  })
   visibility: StoryVisibility;
 
   @Column({ select: false })
   promptId: string;
 
-  @OneToOne(() => Prompt, (prompt) => prompt.story)
+  @OneToOne(() => Prompt, (prompt) => prompt.story, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'promptId' })
   prompt: Prompt;
 }

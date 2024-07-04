@@ -36,16 +36,18 @@ export class Prompt {
   @Column({ type: 'enum', enum: PromptStatus })
   status: PromptStatus;
 
-  @OneToMany(() => Character, (character) => character.prompt)
+  @OneToMany(() => Character, (character) => character.prompt, {
+    onDelete: 'CASCADE',
+  })
   characters: Character[];
 
   @Column({ select: false })
   creatorId: string;
 
-  @ManyToOne(() => User, (user) => user.prompts)
+  @ManyToOne(() => User, (user) => user.prompts, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'creatorId' })
   creator: User;
 
-  @OneToOne(() => Story, (story) => story.prompt)
+  @OneToOne(() => Story, (story) => story.prompt, { onDelete: 'RESTRICT' })
   story: Story;
 }
