@@ -15,6 +15,7 @@ import { CreateCharacterDto } from './dto/create-character.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PromptPublishedEvent } from './events/prompt-published.event';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
+import { Story } from './entities/story.entity';
 
 @Injectable()
 export class StoriesService {
@@ -25,26 +26,73 @@ export class StoriesService {
     @InjectRepository(Character)
     private characterRepository: Repository<Character>,
 
+    private dataSource: DataSource,
+
     private eventEmitter: EventEmitter2,
   ) {}
 
   async createPrompt(creatorId: string, createPromptDto: CreatePromptDto) {
-    const prompt = await this.promptRepository
-      .createQueryBuilder()
-      .insert()
-      .values([
-        {
-          beginning: createPromptDto.beginning,
-          ending: createPromptDto.ending,
-          plot: createPromptDto.plot,
-          status: createPromptDto.status,
-          creatorId,
-        },
-      ])
-      .returning('id')
-      .execute();
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    return { id: prompt.raw[0].id };
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const prompt = await queryRunner.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Prompt)
+        .values([
+          {
+            beginning: createPromptDto.beginning,
+            ending: createPromptDto.ending,
+            plot: createPromptDto.plot,
+            status: createPromptDto.status,
+            creatorId,
+          },
+        ])
+        .returning('id')
+        .execute();
+
+      if (createPromptDto.status === PromptStatus.READY) {
+        await queryRunner.manager
+          .createQueryBuilder()
+          .insert()
+          .into(Story)
+          .values([
+            {
+              promptId: prompt.raw[0].id,
+            },
+          ])
+          .execute();
+      }
+
+      await queryRunner.commitTransaction();
+
+      return { id: prompt.raw[0].id };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+
+    // const prompt = await this.promptRepository
+    //   .createQueryBuilder()
+    //   .insert()
+    //   .values([
+    //     {
+    //       beginning: createPromptDto.beginning,
+    //       ending: createPromptDto.ending,
+    //       plot: createPromptDto.plot,
+    //       status: createPromptDto.status,
+    //       creatorId,
+    //     },
+    //   ])
+    //   .returning('id')
+    //   .execute();
+
+    // return { id: prompt.raw[0].id };
   }
 
   async updatePrompt(id: string, updatePromptDto: UpdatePromptDto) {

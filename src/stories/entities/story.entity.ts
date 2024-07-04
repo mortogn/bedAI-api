@@ -30,7 +30,7 @@ export class Story {
   @Column({ type: 'timestamptz', nullable: true })
   completedAt: Date | null;
 
-  @Column()
+  @Column({ nullable: true })
   content: string;
 
   @Column({ type: 'enum', enum: StoryState, default: StoryState.PROCESSING })
