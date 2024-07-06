@@ -31,7 +31,13 @@ export class Story {
   completedAt: Date | null;
 
   @Column({ nullable: true })
+  title: string;
+
+  @Column({ nullable: true })
   content: string;
+
+  @Column({ nullable: true })
+  plot: string;
 
   @Column({ type: 'enum', enum: StoryState, default: StoryState.PROCESSING })
   state: StoryState;

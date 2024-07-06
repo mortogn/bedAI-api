@@ -13,10 +13,20 @@ import { CreatePromptDto } from './dto/create-prompt.dto';
 import { User } from '@/auth/user';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
+import { Public } from '@/auth/public';
 
 @Controller('stories')
 export class StoriesController {
   constructor(private storiesService: StoriesService) {}
+
+  @Public()
+  @Get(':id')
+  byId(
+    @Param('id', ParseUUIDPipe) id: string,
+    @User('id') userId?: string | undefined,
+  ) {
+    return this.storiesService.getStoryById(id, userId);
+  }
 
   @Get('user/:userId')
   byUserId(

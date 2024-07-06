@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Brackets, DataSource, Repository } from 'typeorm';
 import { Prompt, PromptStatus } from './entities/prompt.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Character } from './entities/character.entity';
@@ -270,6 +270,63 @@ export class StoriesService {
           visibility: StoryVisibility.PUBLIC,
         })
         .getMany();
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async getStoryById(storyId: string, currentUserId?: string | undefined) {
+    try {
+      const story = this.storyRespository
+        .createQueryBuilder('story')
+        .select([
+          'story.id',
+          'story.title',
+          'story.content',
+          'story.visibility',
+          'story.completedAt',
+          'story.plot',
+        ])
+
+        .where('story.id = :storyId', { storyId })
+        .andWhere('story.state = :state', { state: StoryState.DONE });
+
+      if (currentUserId) {
+        story.leftJoin('story.prompt', 'prompt').andWhere(
+          new Brackets((qb) => {
+            qb.where('prompt.creatorId = :creatorId', {
+              creatorId: currentUserId,
+            })
+              .orWhere('story.visibility = :visibility', {
+                visibility: StoryVisibility.PUBLIC,
+              })
+              .orWhere('story.visibility = :visibility', {
+                visibility: StoryVisibility.UNLISTED,
+              });
+          }),
+        );
+      } else {
+        story
+          .andWhere(
+            new Brackets((qb) => {
+              qb.where('story.visibility = :visibility', {
+                visibility: StoryVisibility.PUBLIC,
+              }).orWhere('story.visibility = :visibility', {
+                visibility: StoryVisibility.UNLISTED,
+              });
+            }),
+          )
+          .andWhere('story.title is not null');
+      }
+
+      const dbStory = await story.getOne();
+
+      if (!dbStory) {
+        throw new NotFoundException();
+      }
+
+      return dbStory;
     } catch (err) {
       this.logger.error(err);
       throw err;
