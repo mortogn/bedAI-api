@@ -15,7 +15,7 @@ import { CreateCharacterDto } from './dto/create-character.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PromptPublishedEvent } from './events/prompt-published.event';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
-import { Story } from './entities/story.entity';
+import { Story, StoryState, StoryVisibility } from './entities/story.entity';
 
 @Injectable()
 export class StoriesService {
@@ -27,6 +27,9 @@ export class StoriesService {
 
     @InjectRepository(Character)
     private characterRepository: Repository<Character>,
+
+    @InjectRepository(Story)
+    private storyRespository: Repository<Story>,
 
     private dataSource: DataSource,
 
@@ -67,14 +70,16 @@ export class StoriesService {
             },
           ])
           .execute();
+      }
 
+      await queryRunner.commitTransaction();
+
+      if (createPromptDto.status === PromptStatus.READY) {
         this.eventEmitter.emit(
           'prompt.published',
           new PromptPublishedEvent(prompt.raw[0].id),
         );
       }
-
-      await queryRunner.commitTransaction();
 
       return { id: prompt.raw[0].id };
     } catch (err) {
@@ -86,9 +91,73 @@ export class StoriesService {
     }
   }
 
-  async updatePrompt(id: string, updatePromptDto: UpdatePromptDto) {
+  async updatePrompt(
+    id: string,
+    creatorId: string,
+    updatePromptDto: UpdatePromptDto,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-    } catch (err) {}
+      //? Prompts that are on `ready` status has already been processed to generate story.
+      //? User can only edit the prompts that are not published yet.
+      const isPromptUpdatable = await queryRunner.manager
+        .getRepository(Prompt)
+        .createQueryBuilder('p')
+        .select()
+        .where('p.id = :id', { id })
+        .andWhere('p.status = :status', { status: PromptStatus.DRAFT })
+        .andWhere('p.creatorId = :creatorId', { creatorId })
+        .getExists();
+
+      if (!isPromptUpdatable) {
+        throw new ForbiddenException(
+          'Can not update the provided prompt either because the prompt is already published, is not created by user or does not exist.',
+        );
+      }
+
+      await queryRunner.manager
+        .getRepository(Prompt)
+        .createQueryBuilder()
+        .update()
+        .set({
+          beginning: updatePromptDto.beginning,
+          ending: updatePromptDto.ending,
+          plot: updatePromptDto.plot,
+          status: updatePromptDto.status,
+        })
+        .where('id = :id', { id })
+        .execute();
+
+      if (updatePromptDto.status === PromptStatus.READY) {
+        await queryRunner.manager
+          .getRepository(Story)
+          .createQueryBuilder()
+          .insert()
+          .values([{ promptId: id }])
+          .execute();
+      }
+
+      await queryRunner.commitTransaction();
+
+      if (updatePromptDto.status === PromptStatus.READY) {
+        this.eventEmitter.emit(
+          'prompt.published',
+          new PromptPublishedEvent(id),
+        );
+      }
+
+      return { id };
+    } catch (err) {
+      this.logger.error(err);
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async getPrompt(creatorId: string, promptId: string) {
@@ -170,6 +239,37 @@ export class StoriesService {
         .execute();
 
       return { id: character.raw[0].id };
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async getStoriesByUserId(
+    creatorId: string,
+    currentUserId?: string | undefined,
+    take = 10,
+    skip = 0,
+  ) {
+    try {
+      const stories = this.storyRespository
+        .createQueryBuilder('story')
+        .select()
+        .leftJoin('story.prompt', 'prompt')
+        .where('prompt.creatorId = :creatorId', { creatorId })
+        .andWhere('story.state = :state', { state: StoryState.DONE })
+        .take(take)
+        .skip(skip);
+
+      if (currentUserId && creatorId === currentUserId) {
+        return await stories.getMany();
+      }
+
+      return await stories
+        .andWhere('story.visibility = :visibility', {
+          visibility: StoryVisibility.PUBLIC,
+        })
+        .getMany();
     } catch (err) {
       this.logger.error(err);
       throw err;

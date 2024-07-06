@@ -6,9 +6,10 @@ import { Prompt } from './entities/prompt.entity';
 import { Character } from './entities/character.entity';
 import { Story } from './entities/story.entity';
 import { PromptPublishListener } from './listeners/prompt-published.listener';
+import { OpenaiModule } from '@/openai/openai.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Prompt, Character, Story])],
+  imports: [TypeOrmModule.forFeature([Prompt, Character, Story]), OpenaiModule],
   controllers: [StoriesController],
   providers: [StoriesService, PromptPublishListener],
   exports: [TypeOrmModule],

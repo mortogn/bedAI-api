@@ -12,10 +12,26 @@ import { StoriesService } from './stories.service';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { User } from '@/auth/user';
 import { CreateCharacterDto } from './dto/create-character.dto';
+import { UpdatePromptDto } from './dto/update-prompt.dto';
 
 @Controller('stories')
 export class StoriesController {
   constructor(private storiesService: StoriesService) {}
+
+  @Get('user/:userId')
+  byUserId(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @User('id') currentUserId: string,
+    @Query('take') take?: string,
+    @Query('skip') skip?: string,
+  ) {
+    return this.storiesService.getStoriesByUserId(
+      userId,
+      currentUserId,
+      take ? Number.parseInt(take) : 20,
+      skip ? Number.parseInt(skip) : 0,
+    );
+  }
 
   @Post('prompts')
   createPrompt(
@@ -26,7 +42,13 @@ export class StoriesController {
   }
 
   @Patch('prompts/:id')
-  updatePrompt(@Param('id', ParseUUIDPipe) id: string) {}
+  updatePrompt(
+    @Param('id', ParseUUIDPipe) id: string,
+    @User('id') userId: string,
+    @Body() updatePromptDto: UpdatePromptDto,
+  ) {
+    return this.storiesService.updatePrompt(id, userId, updatePromptDto);
+  }
 
   @Get('prompts')
   getPrompts(

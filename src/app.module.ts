@@ -14,6 +14,7 @@ import configuration from './config/configuration';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionFilter } from './core/filters/exception.filter';
+import { OpenaiModule } from './openai/openai.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ExceptionFilter } from './core/filters/exception.filter';
         host: configService.get<string>('db.host'),
         synchronize: true,
         autoLoadEntities: true,
+        logging: process.env.NODE_ENV !== 'production',
       }),
       inject: [ConfigService],
     }),
@@ -43,6 +45,7 @@ import { ExceptionFilter } from './core/filters/exception.filter';
     UsersModule,
     StoriesModule,
     ImagesModule,
+    OpenaiModule,
   ],
   controllers: [AppController, UsersController],
   providers: [

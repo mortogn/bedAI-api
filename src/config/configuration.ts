@@ -11,4 +11,7 @@ export default () => ({
     refreshSecret: process.env.JWT_REFRESH_SECRET,
   },
   port: process.env.PORT,
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY,
+  },
 });
