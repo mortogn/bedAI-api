@@ -12,8 +12,7 @@ import { Image, ImageEntity } from './entities/image.entity';
 import { DataSource, Repository } from 'typeorm';
 import { GenerateDto } from './dto/generate.dto';
 import { User } from '@/users/entities/user.entity';
-import { Character } from '@/stories/entities/character.entity';
-import { Story } from '@/stories/entities/story.entity';
+import { Character } from '@/characters/entities/character.entity';
 
 @Injectable()
 export class ImagesService {
@@ -28,8 +27,6 @@ export class ImagesService {
 
     @InjectRepository(Character)
     private characterRepository: Repository<Character>,
-
-    private datasource: DataSource,
   ) {}
 
   async generate(creatorId: string, generateDto: GenerateDto) {

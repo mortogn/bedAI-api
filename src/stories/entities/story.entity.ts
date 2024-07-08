@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Prompt } from './prompt.entity';
+import { Prompt } from '@/prompts/entities/prompt.entity';
 
 export enum StoryState {
   PROCESSING = 'processing',

@@ -1,5 +1,5 @@
 import { Image } from '@/images/entities/image.entity';
-import { Prompt } from '@/stories/entities/prompt.entity';
+import { Prompt } from '@/prompts/entities/prompt.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

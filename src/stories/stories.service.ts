@@ -16,234 +16,235 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PromptPublishedEvent } from './events/prompt-published.event';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
 import { Story, StoryState, StoryVisibility } from './entities/story.entity';
+import { UpdateStoryDto } from './dto/update-story.dto';
 
 @Injectable()
 export class StoriesService {
   private readonly logger = new Logger(StoriesService.name);
 
   constructor(
-    @InjectRepository(Prompt)
-    private promptRepository: Repository<Prompt>,
+    // @InjectRepository(Prompt)
+    // private promptRepository: Repository<Prompt>,
 
-    @InjectRepository(Character)
-    private characterRepository: Repository<Character>,
+    // @InjectRepository(Character)
+    // private characterRepository: Repository<Character>,
 
     @InjectRepository(Story)
     private storyRespository: Repository<Story>,
 
     private dataSource: DataSource,
 
-    private eventEmitter: EventEmitter2,
+    // private eventEmitter: EventEmitter2,
   ) {}
 
-  async createPrompt(creatorId: string, createPromptDto: CreatePromptDto) {
-    const queryRunner = this.dataSource.createQueryRunner();
+  // async createPrompt(creatorId: string, createPromptDto: CreatePromptDto) {
+  //   const queryRunner = this.dataSource.createQueryRunner();
 
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      const prompt = await queryRunner.manager
-        .createQueryBuilder()
-        .insert()
-        .into(Prompt)
-        .values([
-          {
-            beginning: createPromptDto.beginning,
-            ending: createPromptDto.ending,
-            plot: createPromptDto.plot,
-            status: createPromptDto.status,
-            creatorId,
-          },
-        ])
-        .returning('id')
-        .execute();
+  //   try {
+  //     const prompt = await queryRunner.manager
+  //       .createQueryBuilder()
+  //       .insert()
+  //       .into(Prompt)
+  //       .values([
+  //         {
+  //           beginning: createPromptDto.beginning,
+  //           ending: createPromptDto.ending,
+  //           plot: createPromptDto.plot,
+  //           status: createPromptDto.status,
+  //           creatorId,
+  //         },
+  //       ])
+  //       .returning('id')
+  //       .execute();
 
-      if (createPromptDto.status === PromptStatus.READY) {
-        await queryRunner.manager
-          .createQueryBuilder()
-          .insert()
-          .into(Story)
-          .values([
-            {
-              promptId: prompt.raw[0].id,
-            },
-          ])
-          .execute();
-      }
+  //     if (createPromptDto.status === PromptStatus.READY) {
+  //       await queryRunner.manager
+  //         .createQueryBuilder()
+  //         .insert()
+  //         .into(Story)
+  //         .values([
+  //           {
+  //             promptId: prompt.raw[0].id,
+  //           },
+  //         ])
+  //         .execute();
+  //     }
 
-      await queryRunner.commitTransaction();
+  //     await queryRunner.commitTransaction();
 
-      if (createPromptDto.status === PromptStatus.READY) {
-        this.eventEmitter.emit(
-          'prompt.published',
-          new PromptPublishedEvent(prompt.raw[0].id),
-        );
-      }
+  //     if (createPromptDto.status === PromptStatus.READY) {
+  //       this.eventEmitter.emit(
+  //         'prompt.published',
+  //         new PromptPublishedEvent(prompt.raw[0].id),
+  //       );
+  //     }
 
-      return { id: prompt.raw[0].id };
-    } catch (err) {
-      this.logger.error(err);
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return { id: prompt.raw[0].id };
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     await queryRunner.rollbackTransaction();
+  //     throw err;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
-  async updatePrompt(
-    id: string,
-    creatorId: string,
-    updatePromptDto: UpdatePromptDto,
-  ) {
-    const queryRunner = this.dataSource.createQueryRunner();
+  // async updatePrompt(
+  //   id: string,
+  //   creatorId: string,
+  //   updatePromptDto: UpdatePromptDto,
+  // ) {
+  //   const queryRunner = this.dataSource.createQueryRunner();
 
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      //? Prompts that are on `ready` status has already been processed to generate story.
-      //? User can only edit the prompts that are not published yet.
-      const isPromptUpdatable = await queryRunner.manager
-        .getRepository(Prompt)
-        .createQueryBuilder('p')
-        .select()
-        .where('p.id = :id', { id })
-        .andWhere('p.status = :status', { status: PromptStatus.DRAFT })
-        .andWhere('p.creatorId = :creatorId', { creatorId })
-        .getExists();
+  //   try {
+  //     //? Prompts that are on `ready` status has already been processed to generate story.
+  //     //? User can only edit the prompts that are not published yet.
+  //     const isPromptUpdatable = await queryRunner.manager
+  //       .getRepository(Prompt)
+  //       .createQueryBuilder('p')
+  //       .select()
+  //       .where('p.id = :id', { id })
+  //       .andWhere('p.status = :status', { status: PromptStatus.DRAFT })
+  //       .andWhere('p.creatorId = :creatorId', { creatorId })
+  //       .getExists();
 
-      if (!isPromptUpdatable) {
-        throw new ForbiddenException(
-          'Can not update the provided prompt either because the prompt is already published, is not created by user or does not exist.',
-        );
-      }
+  //     if (!isPromptUpdatable) {
+  //       throw new ForbiddenException(
+  //         'Can not update the provided prompt either because the prompt is already published, is not created by user or does not exist.',
+  //       );
+  //     }
 
-      await queryRunner.manager
-        .getRepository(Prompt)
-        .createQueryBuilder()
-        .update()
-        .set({
-          beginning: updatePromptDto.beginning,
-          ending: updatePromptDto.ending,
-          plot: updatePromptDto.plot,
-          status: updatePromptDto.status,
-        })
-        .where('id = :id', { id })
-        .execute();
+  //     await queryRunner.manager
+  //       .getRepository(Prompt)
+  //       .createQueryBuilder()
+  //       .update()
+  //       .set({
+  //         beginning: updatePromptDto.beginning,
+  //         ending: updatePromptDto.ending,
+  //         plot: updatePromptDto.plot,
+  //         status: updatePromptDto.status,
+  //       })
+  //       .where('id = :id', { id })
+  //       .execute();
 
-      if (updatePromptDto.status === PromptStatus.READY) {
-        await queryRunner.manager
-          .getRepository(Story)
-          .createQueryBuilder()
-          .insert()
-          .values([{ promptId: id }])
-          .execute();
-      }
+  //     if (updatePromptDto.status === PromptStatus.READY) {
+  //       await queryRunner.manager
+  //         .getRepository(Story)
+  //         .createQueryBuilder()
+  //         .insert()
+  //         .values([{ promptId: id }])
+  //         .execute();
+  //     }
 
-      await queryRunner.commitTransaction();
+  //     await queryRunner.commitTransaction();
 
-      if (updatePromptDto.status === PromptStatus.READY) {
-        this.eventEmitter.emit(
-          'prompt.published',
-          new PromptPublishedEvent(id),
-        );
-      }
+  //     if (updatePromptDto.status === PromptStatus.READY) {
+  //       this.eventEmitter.emit(
+  //         'prompt.published',
+  //         new PromptPublishedEvent(id),
+  //       );
+  //     }
 
-      return { id };
-    } catch (err) {
-      this.logger.error(err);
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return { id };
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     await queryRunner.rollbackTransaction();
+  //     throw err;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
-  async getPrompt(creatorId: string, promptId: string) {
-    try {
-      const prompt = await this.promptRepository
-        .createQueryBuilder('prompt')
-        .select()
-        .leftJoinAndSelect('prompt.characters', 'character')
-        .where('prompt.id = :promptId', { promptId })
-        .andWhere('prompt.creatorId = :creatorId', { creatorId })
-        .getOne();
+  // async getPrompt(creatorId: string, promptId: string) {
+  //   try {
+  //     const prompt = await this.promptRepository
+  //       .createQueryBuilder('prompt')
+  //       .select()
+  //       .leftJoinAndSelect('prompt.characters', 'character')
+  //       .where('prompt.id = :promptId', { promptId })
+  //       .andWhere('prompt.creatorId = :creatorId', { creatorId })
+  //       .getOne();
 
-      if (!prompt) {
-        throw new NotFoundException();
-      }
+  //     if (!prompt) {
+  //       throw new NotFoundException();
+  //     }
 
-      return prompt;
-    } catch (err) {
-      this.logger.error(err);
-      throw err;
-    }
-  }
+  //     return prompt;
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     throw err;
+  //   }
+  // }
 
-  async getPrompts(creatorId: string, take = 20, skip = 0) {
-    try {
-      const prompts = await this.promptRepository
-        .createQueryBuilder('prompt')
-        .select([
-          'prompt.id',
-          'prompt.plot',
-          'prompt.status',
-          'character.id',
-          'character.name',
-        ])
-        .leftJoinAndSelect('prompt.characters', 'character')
-        .where('prompt.creatorId = :creatorId', { creatorId })
-        .skip(skip)
-        .take(take)
-        .getMany();
+  // async getPrompts(creatorId: string, take = 20, skip = 0) {
+  //   try {
+  //     const prompts = await this.promptRepository
+  //       .createQueryBuilder('prompt')
+  //       .select([
+  //         'prompt.id',
+  //         'prompt.plot',
+  //         'prompt.status',
+  //         'character.id',
+  //         'character.name',
+  //       ])
+  //       .leftJoinAndSelect('prompt.characters', 'character')
+  //       .where('prompt.creatorId = :creatorId', { creatorId })
+  //       .skip(skip)
+  //       .take(take)
+  //       .getMany();
 
-      return prompts;
-    } catch (err) {
-      this.logger.error(err);
-      throw err;
-    }
-  }
+  //     return prompts;
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     throw err;
+  //   }
+  // }
 
-  async createCharacter(
-    creatorId: string,
-    createCharacterDto: CreateCharacterDto,
-  ) {
-    try {
-      //? Checking if the logged in user the one who created the provided prompt
-      const prompt = await this.promptRepository
-        .createQueryBuilder('prompt')
-        .select()
-        .where('prompt.creatorId = :creatorId', { creatorId })
-        .andWhere('prompt.id = :promptId', {
-          promptId: createCharacterDto.promptId,
-        })
-        .getCount();
+  // async createCharacter(
+  //   creatorId: string,
+  //   createCharacterDto: CreateCharacterDto,
+  // ) {
+  //   try {
+  //     //? Checking if the logged in user the one who created the provided prompt
+  //     const prompt = await this.promptRepository
+  //       .createQueryBuilder('prompt')
+  //       .select()
+  //       .where('prompt.creatorId = :creatorId', { creatorId })
+  //       .andWhere('prompt.id = :promptId', {
+  //         promptId: createCharacterDto.promptId,
+  //       })
+  //       .getCount();
 
-      if (!prompt) {
-        throw new ForbiddenException();
-      }
+  //     if (!prompt) {
+  //       throw new ForbiddenException();
+  //     }
 
-      const character = await this.characterRepository
-        .createQueryBuilder()
-        .insert()
-        .values([
-          {
-            name: createCharacterDto.name,
-            description: createCharacterDto.description,
-            promptId: createCharacterDto.promptId,
-            priority: createCharacterDto.priority,
-          },
-        ])
-        .returning('id')
-        .execute();
+  //     const character = await this.characterRepository
+  //       .createQueryBuilder()
+  //       .insert()
+  //       .values([
+  //         {
+  //           name: createCharacterDto.name,
+  //           description: createCharacterDto.description,
+  //           promptId: createCharacterDto.promptId,
+  //           priority: createCharacterDto.priority,
+  //         },
+  //       ])
+  //       .returning('id')
+  //       .execute();
 
-      return { id: character.raw[0].id };
-    } catch (err) {
-      this.logger.error(err);
-      throw err;
-    }
-  }
+  //     return { id: character.raw[0].id };
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     throw err;
+  //   }
+  // }
 
   async getStoriesByUserId(
     creatorId: string,
@@ -328,6 +329,65 @@ export class StoriesService {
 
       return dbStory;
     } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async getStories(sort: 'popular' | 'recent', take: number, skip: number) {
+    try {
+      const stories = this.storyRespository
+        .createQueryBuilder('story')
+        .select()
+        .where('story.visibility = :visibility', {
+          visibility: StoryVisibility.PUBLIC,
+        })
+        .andWhere('story.title IS NOT NULL')
+        .andWhere('story.state = :state', { state: StoryState.DONE });
+
+      if (sort === 'recent') {
+        stories.orderBy('story.completedAt');
+      }
+
+      return await stories.take(take).skip(skip).getMany();
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  async updateStory(
+    storyId: string,
+    userId: string,
+    updateStoryDto: UpdateStoryDto,
+  ) {
+    try {
+      const isStoryEditable = await this.storyRespository
+        .createQueryBuilder('story')
+        .select()
+        .leftJoin('story.prompt', 'prompt')
+        .where('story.id = :storyId', { storyId })
+        .andWhere('prompt.creatorId = :creatorId', { creatorId: userId })
+        .getExists();
+
+      if (!isStoryEditable) {
+        throw new ForbiddenException('Story can not be updated.');
+      }
+
+      await this.storyRespository
+        .createQueryBuilder()
+        .update()
+        .set({
+          title: updateStoryDto.title,
+          plot: updateStoryDto.plot,
+          visibility: updateStoryDto.visibility,
+        })
+        .where('id = :storyId', { storyId })
+        .execute();
+    } catch (err) {
+      if (err instanceof ForbiddenException) {
+        throw err;
+      }
       this.logger.error(err);
       throw err;
     }

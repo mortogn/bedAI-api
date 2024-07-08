@@ -15,6 +15,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionFilter } from './core/filters/exception.filter';
 import { OpenaiModule } from './openai/openai.module';
+import { PromptsController } from './prompts/prompts.controller';
+import { PromptsModule } from './prompts/prompts.module';
+import { CharactersModule } from './characters/characters.module';
+import { PromptsService } from './prompts/prompts.service';
 
 @Module({
   imports: [
@@ -46,8 +50,10 @@ import { OpenaiModule } from './openai/openai.module';
     StoriesModule,
     ImagesModule,
     OpenaiModule,
+    PromptsModule,
+    CharactersModule,
   ],
-  controllers: [AppController, UsersController],
+  controllers: [AppController, UsersController, PromptsController],
   providers: [
     AppService,
     UsersService,
@@ -55,6 +61,7 @@ import { OpenaiModule } from './openai/openai.module';
       provide: APP_FILTER,
       useClass: ExceptionFilter,
     },
+    PromptsService,
   ],
 })
 export class AppModule {}
