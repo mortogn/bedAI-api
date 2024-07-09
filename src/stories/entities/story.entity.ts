@@ -24,7 +24,7 @@ export class Story {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'timestamptz', default: new Date() })
+  @Column({ type: 'timestamptz', default: new Date(), select: false })
   createdAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
@@ -39,7 +39,12 @@ export class Story {
   @Column({ nullable: true })
   plot: string;
 
-  @Column({ type: 'enum', enum: StoryState, default: StoryState.PROCESSING })
+  @Column({
+    type: 'enum',
+    enum: StoryState,
+    default: StoryState.PROCESSING,
+    select: false,
+  })
   state: StoryState;
 
   @Column({

@@ -110,7 +110,13 @@ export class StoriesService {
     try {
       const stories = this.storyRespository
         .createQueryBuilder('story')
-        .select()
+        .select([
+          'story.id',
+          'story.completedAt',
+          'story.plot',
+          'story.visibility',
+          'story.title',
+        ])
         .where('story.visibility = :visibility', {
           visibility: StoryVisibility.PUBLIC,
         })

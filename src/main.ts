@@ -26,6 +26,12 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    origin: ['http://localhost:5173'],
+    methods: ['GET', 'POST', 'PATCH'],
+  });
+
   const configService = app.get(ConfigService);
 
   await app.listen(configService.get<number>('port'));
