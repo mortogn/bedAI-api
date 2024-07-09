@@ -123,11 +123,11 @@ export class PromptsService {
   ) {
     try {
       const isPromptUpdatable = await this.promptRepository
-        .createQueryBuilder()
+        .createQueryBuilder('prompt')
         .select()
-        .where('creatorId = :creatorId', { creatorId })
-        .andWhere('id = :promptId', { promptId })
-        .andWhere('status = :status', { status: PromptStatus.DRAFT })
+        .where('prompt.creatorId = :creatorId', { creatorId })
+        .andWhere('prompt.id = :promptId', { promptId })
+        .andWhere('prompt.status = :status', { status: PromptStatus.DRAFT })
         .getExists();
 
       if (!isPromptUpdatable) {
