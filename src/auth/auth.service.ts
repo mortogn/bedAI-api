@@ -62,6 +62,16 @@ export class AuthService {
 
   async signUp({ email, firstname, lastname, password, username }: SignUpDto) {
     try {
+      const doesUserExists = await this.userRepository
+        .createQueryBuilder('user')
+        .select(['user.email'])
+        .where('user.email = :email', { email })
+        .getExists();
+
+      if (doesUserExists) {
+        throw new BadRequestException('User already exists');
+      }
+
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const user = await this.userRepository

@@ -51,7 +51,7 @@ export class StoriesService {
 
   async getStoryById(storyId: string, currentUserId?: string | undefined) {
     try {
-      const story = this.storyRespository
+      const story = await this.storyRespository
         .createQueryBuilder('story')
         .select([
           'story.id',
@@ -60,46 +60,38 @@ export class StoriesService {
           'story.visibility',
           'story.completedAt',
           'story.plot',
+          'story.state',
         ])
-
+        .leftJoinAndSelect('story.prompt', 'prompt')
+        .leftJoinAndSelect('prompt.creator', 'creator')
         .where('story.id = :storyId', { storyId })
-        .andWhere('story.state = :state', { state: StoryState.DONE });
-
-      if (currentUserId) {
-        story.leftJoin('story.prompt', 'prompt').andWhere(
+        .andWhere(
           new Brackets((qb) => {
-            qb.where('prompt.creatorId = :creatorId', {
-              creatorId: currentUserId,
-            })
-              .orWhere('story.visibility = :visibility', {
-                visibility: StoryVisibility.PUBLIC,
-              })
-              .orWhere('story.visibility = :visibility', {
-                visibility: StoryVisibility.UNLISTED,
-              });
+            qb.where('story.visibility = :public', {
+              public: StoryVisibility.PUBLIC,
+            }).orWhere('story.visibility = :unlisted', {
+              unlisted: StoryVisibility.UNLISTED,
+            });
           }),
-        );
-      } else {
-        story
-          .andWhere(
-            new Brackets((qb) => {
-              qb.where('story.visibility = :visibility', {
-                visibility: StoryVisibility.PUBLIC,
-              }).orWhere('story.visibility = :visibility', {
-                visibility: StoryVisibility.UNLISTED,
-              });
-            }),
-          )
-          .andWhere('story.title is not null');
-      }
+        )
+        .getOne();
 
-      const dbStory = await story.getOne();
-
-      if (!dbStory) {
+      if (
+        ((!story || story.state !== StoryState.DONE) && !currentUserId) ||
+        (currentUserId && story.prompt.creatorId === currentUserId)
+      ) {
         throw new NotFoundException();
       }
 
-      return dbStory;
+      const processedStory = { ...story, creator: story.prompt.creator };
+
+      // Email should not be returned to the public users
+      delete processedStory.creator.email;
+
+      // Do not include unwanted informations to public users.
+      delete processedStory.prompt;
+
+      return processedStory;
     } catch (err) {
       this.logger.error(err);
       throw err;
