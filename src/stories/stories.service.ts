@@ -57,7 +57,6 @@ export class StoriesService {
           'story.id',
           'story.title',
           'story.content',
-          'story.visibility',
           'story.completedAt',
           'story.plot',
           'story.state',
@@ -91,6 +90,10 @@ export class StoriesService {
       // Do not include unwanted informations to public users.
       delete processedStory.prompt;
 
+      if (processedStory.creator.id !== currentUserId) {
+        delete processedStory.state;
+      }
+
       return processedStory;
     } catch (err) {
       this.logger.error(err);
@@ -102,13 +105,7 @@ export class StoriesService {
     try {
       const stories = this.storyRespository
         .createQueryBuilder('story')
-        .select([
-          'story.id',
-          'story.completedAt',
-          'story.plot',
-          'story.visibility',
-          'story.title',
-        ])
+        .select(['story.id', 'story.completedAt', 'story.plot', 'story.title'])
         .where('story.visibility = :visibility', {
           visibility: StoryVisibility.PUBLIC,
         })
