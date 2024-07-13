@@ -23,7 +23,7 @@ export class StoriesController {
     @Query('skip') skip?: string,
     @Query('sort') sort?: string,
   ) {
-    return this.storiesService.getStories(
+    return this.storiesService.list(
       sort && sort === 'recent' ? sort : 'recent',
       take ? Number.parseInt(take) : 10,
       skip ? Number.parseInt(skip) : 0,
@@ -36,7 +36,7 @@ export class StoriesController {
     @Param('id', ParseUUIDPipe) id: string,
     @User('id') userId?: string | undefined,
   ) {
-    return this.storiesService.getStoryById(id, userId);
+    return this.storiesService.byId(id, userId);
   }
 
   @Patch(':id')
@@ -45,7 +45,7 @@ export class StoriesController {
     @Body() updateStoryDto: UpdateStoryDto,
     @User('id') userId: string,
   ) {
-    return this.storiesService.updateStory(storyId, userId, updateStoryDto);
+    return this.storiesService.update(storyId, userId, updateStoryDto);
   }
 
   @Get('user/:userId')
@@ -55,11 +55,6 @@ export class StoriesController {
     @Query('take') take = 20,
     @Query('skip') skip = 0,
   ) {
-    return this.storiesService.getStoriesByUserId(
-      take,
-      skip,
-      userId,
-      currentUserId,
-    );
+    return this.storiesService.byUserId(take, skip, userId, currentUserId);
   }
 }

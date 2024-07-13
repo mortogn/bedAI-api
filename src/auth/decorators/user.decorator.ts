@@ -1,6 +1,6 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 
-type Payload = {
+export type JwtPayload = {
   id: string;
   sub: string;
   iat: number;
@@ -8,8 +8,12 @@ type Payload = {
 };
 
 export const User = createParamDecorator(
-  (data: keyof Payload, context: ExecutionContext) => {
+  (data: keyof JwtPayload | undefined, context: ExecutionContext) => {
     const request = context.switchToHttp().getRequest();
+
+    if (!data) {
+      return request.user;
+    }
 
     return request.user ? request.user[data] : undefined;
   },

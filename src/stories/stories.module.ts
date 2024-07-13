@@ -10,6 +10,6 @@ import { OpenaiModule } from '@/openai/openai.module';
   imports: [TypeOrmModule.forFeature([Story]), OpenaiModule],
   controllers: [StoriesController],
   providers: [StoriesService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, StoriesService],
 })
 export class StoriesModule {}

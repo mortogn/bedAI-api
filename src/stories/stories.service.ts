@@ -18,7 +18,7 @@ export class StoriesService {
     private storyRespository: Repository<Story>,
   ) {}
 
-  async getStoriesByUserId(
+  async byUserId(
     take: number,
     skip: number,
     creatorId: string,
@@ -49,7 +49,7 @@ export class StoriesService {
     }
   }
 
-  async getStoryById(storyId: string, currentUserId?: string | undefined) {
+  async byId(storyId: string, currentUserId?: string | undefined) {
     try {
       const story = await this.storyRespository
         .createQueryBuilder('story')
@@ -101,7 +101,7 @@ export class StoriesService {
     }
   }
 
-  async getStories(sort: 'popular' | 'recent', take: number, skip: number) {
+  async list(sort: 'popular' | 'recent', take: number, skip: number) {
     try {
       const stories = this.storyRespository
         .createQueryBuilder('story')
@@ -123,7 +123,7 @@ export class StoriesService {
     }
   }
 
-  async updateStory(
+  async update(
     storyId: string,
     userId: string,
     updateStoryDto: UpdateStoryDto,
